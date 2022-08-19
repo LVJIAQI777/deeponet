@@ -10,41 +10,57 @@ model_path = "./model/U_2_T/"
 
 def generate_data(ratio):
     x = np.loadtxt(data_path + 'x_10_15.dat')
-    U = np.loadtxt(data_path + 'U_10_15.dat')
-    T = np.loadtxt(data_path + 'T_10_15.dat')
+    U = np.loadtxt(data_path + 'U_10_15.dat')[:,1:]
+    T = np.loadtxt(data_path + 'T_10_15.dat')[:,1:]
 
-    N = x.shape[0]
+    N = U.shape[0]
     N_train = int(ratio[0] * N)
     N_valid = int(ratio[1] * N)
     N_test = N - N_train - N_valid
-
-    data = np.stack((x, U, T), axis=-1)
-    # 需要打乱数据加上这一行
-    np.random.shuffle(data)
-
-    xx = data[:,0]
-    UU = data[:,1]
-    TT = data[:,2]
     
+    x = x.reshape(-1,1)
 
     # x:Branch and Trunk net input y:output
-    x_train = (data[0:N_train, 1], data[0:N_train, 0])
-    y_train = data[0:N_train, 2]
+    x_train = (U[0:N_train, :], x)
+    y_train = T[0:N_train, :]
 
-    x_valid = (data[N_train:N_train+N_valid, 1],
-            data[N_train:N_train+N_valid, 0])
-    y_valid = data[N_train:N_train+N_valid, 2]
+    x_valid = (U[N_train:N_train+N_valid, :], x)
+    y_valid = T[N_train:N_train+N_valid, :]
 
-    x_test = (data[-N_test:, 1], data[-N_test:, 0])
-    y_test = data[-N_test:, 2]
+    x_test = (U[-N_test:, :], x)
+    y_test = T[-N_test:, :]
     return x_train,y_train,x_valid,y_valid,x_test,y_test
 
 data_ratio = np.array([0.7,0.2,0.1])
 x_train,y_train,x_valid,y_valid,x_test,y_test = generate_data(data_ratio)
 
-
-
+# 构造三元组
 data = dde.data.TripleCartesianProd(
     X_train=x_train, y_train=y_train, X_test=x_valid, y_test=y_valid
 )
 
+# Choose a network
+m = x_train[1].shape[0]
+dim_x = 1
+net = dde.nn.DeepONetCartesianProd(
+    [m, 100, 100, 100],
+    [dim_x, 100, 100, 100],
+    "relu",
+    "Glorot normal",
+)
+
+# Define a Model
+model = dde.Model(data, net)
+
+# Compile and Train
+model.compile("adam", lr=0.001, metrics=["mean l2 relative error"])
+checker = dde.callbacks.ModelCheckpoint(
+    model_path+"model.ckpt", verbose=1, save_better_only=True, period=1000
+)
+losshistory, train_state = model.train(iterations=50000, callbacks=[checker])
+
+# 保存数据和图片
+# dde.saveplot(losshistory, train_state, issave=True, isplot=True)
+
+dde.utils.plot_loss_history(losshistory,pic_path+'loss_history.png')
+dde.utils.save_loss_history(losshistory,data_path+'loss_history.dat')
