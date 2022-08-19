@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Load dataset
-data_path = "./data/"
-pic_path = "./pic/"
-model_path = "./model/"
+data_path = "./data/U_2_T/"
+pic_path = "./pic/U_2_T/"
+model_path = "./model/U_2_T/"
 
 def generate_data(ratio):
-    x = np.loadtxt(data_path + 'U.txt')[:, 0]
-    U = np.loadtxt(data_path + 'U.txt')[:, 1]
-    T = np.loadtxt(data_path + 'T&Tv.txt')[:, 1]
+    x = np.loadtxt(data_path + 'x_10_15.dat')
+    U = np.loadtxt(data_path + 'U_10_15.dat')
+    T = np.loadtxt(data_path + 'T_10_15.dat')
 
     N = x.shape[0]
     N_train = int(ratio[0] * N)

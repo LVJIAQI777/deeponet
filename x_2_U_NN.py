@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Load dataset
-data_path = "./data/"
-pic_path = "./pic/"
-model_path = "./model/"
+data_path = "./data/x_2_U/"
+pic_path = "./pic/x_2_U/"
+model_path = "./model/x_2_U/"
 
 
 def generate_data(ratio):
