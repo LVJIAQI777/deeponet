@@ -10,8 +10,9 @@ model_path = "./model/U_2_T/"
 
 def generate_data(ratio):
     x = np.loadtxt(data_path + 'x_10_15.dat')
-    U = np.loadtxt(data_path + 'U_10_15.dat')[:,1:]
-    T = np.loadtxt(data_path + 'T_10_15.dat')[:,1:]
+    np.insert(x,0,[-1])
+    U = np.loadtxt(data_path + 'U_10_15.dat')
+    T = np.loadtxt(data_path + 'T_10_15.dat')
 
     N = U.shape[0]
     N_train = int(ratio[0] * N)
