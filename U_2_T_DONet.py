@@ -10,7 +10,7 @@ model_path = "./model/U_2_T/"
 
 def generate_data(ratio):
     x = np.loadtxt(data_path + 'x_10_15.dat')
-    np.insert(x,0,[-1])
+    x = np.insert(x,0,[-1])
     U = np.loadtxt(data_path + 'U_10_15.dat')
     T = np.loadtxt(data_path + 'T_10_15.dat')
 
@@ -49,8 +49,8 @@ data = dde.data.TripleCartesianProd(
 m = x_train[1].shape[0]
 dim_x = 1
 net = dde.nn.DeepONetCartesianProd(
-    [m, 100, 100, 100],
-    [dim_x, 100, 100, 100],
+    [m, 100, 100, 100, 100],
+    [dim_x, 100, 100, 100, 100],
     "relu",
     "Glorot normal",
 )
@@ -63,10 +63,41 @@ model.compile("adam", lr=0.001, metrics=["mean l2 relative error"])
 checker = dde.callbacks.ModelCheckpoint(
     model_path+"model.ckpt", verbose=1, save_better_only=True, period=1000
 )
-losshistory, train_state = model.train(iterations=50000, callbacks=[checker])
+losshistory, train_state = model.train(iterations=100000, callbacks=[checker])
+
+print("Best step valid data MSE:{}".format(train_state.best_metrics[0]))
 
 # 保存数据和图片
 # dde.saveplot(losshistory, train_state, issave=True, isplot=True)
 
 dde.utils.plot_loss_history(losshistory,pic_path+'loss_history.png')
 dde.utils.save_loss_history(losshistory,data_path+'loss_history.dat')
+
+# 对DeepOnet中triple进行储存
+fname_train_U = data_path+'train_U.dat'
+print("Saving training data to {} ...".format(fname_train_U))
+np.savetxt(fname_train_U, train_state.X_train[0],fmt='%.6f')
+
+fname_train_T = data_path+'train_T.dat'
+print("Saving training data to {} ...".format(fname_train_T))
+np.savetxt(fname_train_T, train_state.y_train,fmt='%.6f')
+
+fname_valid_U = data_path+'valid_U.dat'
+print("Saving valid data to {} ...".format(fname_valid_U))
+np.savetxt(fname_valid_U, train_state.X_test[0],fmt='%.6f')
+
+fname_valid_T = data_path+'valid_T.dat'
+print("Saving valid data to {} ...".format(fname_valid_T))
+np.savetxt(fname_valid_T, train_state.y_test,fmt='%.6f')
+
+fname_valid_T_pred = data_path+'valid_T_pred.dat'
+print("Saving valid data to {} ...".format(fname_valid_T_pred))
+np.savetxt(fname_valid_T_pred, train_state.best_y,fmt='%.6f')
+
+fname_test_U = data_path+'test_U.dat'
+print("Saving test data to {} ...".format(fname_test_U))
+np.savetxt(fname_test_U, x_test[0],fmt='%.6f')
+
+fname_test_T = data_path+'test_T.dat'
+print("Saving test data to {} ...".format(fname_test_T))
+np.savetxt(fname_test_T, y_test,fmt='%.6f')
