@@ -17,6 +17,11 @@ def generate_data(ratio):
     N_train = int(ratio[0] * N)
     N_valid = int(ratio[1] * N)
     N_test = N - N_train - N_valid
+
+    # 需要打乱数据加上这一行,对行数进行打乱
+    shuffle_ix = np.random.permutation(np.arange(U.shape[0]))
+    U = U[shuffle_ix]
+    T = T[shuffle_ix]
     
     x = x.reshape(-1,1)
 
