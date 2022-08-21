@@ -68,10 +68,10 @@ model.compile("adam", lr=0.0006, metrics=["mean l2 relative error"])
 checker = dde.callbacks.ModelCheckpoint(
     model_path+"model.ckpt", verbose=1, save_better_only=True, period=1000
 )
-losshistory, train_state = model.train(iterations=120000, callbacks=[checker])
+losshistory, train_state = model.train(iterations=1000, callbacks=[checker])
 
 print("Best step : {}".format(train_state.best_step))
-print("Best step valid data MSE : {}".format(train_state.best_metrics[0]))
+print("Best step mean l2 relative error : {}\n".format(train_state.best_metrics[0]))
 
 # 保存数据和图片
 # dde.saveplot(losshistory, train_state, issave=True, isplot=True)
@@ -113,5 +113,23 @@ print("Saving test data to {} ...".format(fname_test_U))
 np.savetxt(fname_test_U, test_U,fmt='%.6f')
 
 fname_test_T = data_path+'test_T.dat'
-print("Saving test data to {} ...".format(fname_test_T))
+print("Saving test data to {} ...\n".format(fname_test_T))
 np.savetxt(fname_test_T, test_T,fmt='%.6f')
+
+# restore model
+# model.restore(model_path+"model.ckpt-113000.ckpt")
+model.restore(model_path+"model.ckpt-" + str(train_state.best_step) + ".ckpt", verbose=1)
+
+U = test_U
+Ma = U[:,0]
+U = np.delete(U,0,axis=1)
+
+print("Predicting ...")
+inputdata = (U,x)
+outputdata = model.predict(inputdata)
+pred_T = np.insert(outputdata,0,Ma,axis=1)
+
+# save
+fname_output = data_path+'test_T_pred.dat'
+print("Saving test data to {} ...".format(fname_output))
+np.savetxt(fname_output, pred_T,fmt='%.6f')
