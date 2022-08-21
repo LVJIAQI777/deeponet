@@ -3,6 +3,7 @@ model/
 data/
 pic/
 doc/
+plot_m/
 
 # others
 temp/
