@@ -8,7 +8,7 @@ data_path = "./data/U_2_T/"
 pic_path = "./pic/U_2_T/"
 model_path = "./model/U_2_T/"
 
-ratio = np.array([0.7,0.2,0.1])
+ratio = np.array([0.8,0.15,0.05])
 
 x = np.loadtxt(data_path + 'x_10_15.dat')
 
@@ -68,10 +68,10 @@ model.compile("adam", lr=0.0006, metrics=["mean l2 relative error"])
 checker = dde.callbacks.ModelCheckpoint(
     model_path+"model.ckpt", verbose=1, save_better_only=True, period=1000
 )
-losshistory, train_state = model.train(iterations=1000, callbacks=[checker])
+losshistory, train_state = model.train(iterations=120000, callbacks=[checker])
 
-print("Best step : {}".format(train_state.best_step))
-print("Best step mean l2 relative error : {}\n".format(train_state.best_metrics[0]))
+# print("Best step : {}".format(train_state.best_step))
+# print("Best step valid data mean l2 relative error : {}\n".format(train_state.best_metrics[0]))
 
 # 保存数据和图片
 # dde.saveplot(losshistory, train_state, issave=True, isplot=True)
@@ -128,6 +128,8 @@ print("Predicting ...")
 inputdata = (U,x)
 outputdata = model.predict(inputdata)
 pred_T = np.insert(outputdata,0,Ma,axis=1)
+
+print("test data L2 relative error:", dde.metrics.l2_relative_error(test_T, pred_T))
 
 # save
 fname_output = data_path+'test_T_pred.dat'
