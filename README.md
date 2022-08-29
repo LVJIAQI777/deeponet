@@ -1,1 +1,1 @@
-# State-to-State using deeponet
+# Nonequilibrium flow using deeponet
