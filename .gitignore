@@ -5,5 +5,9 @@ pic/
 doc/
 plot_m/
 
+# file
+test*.py
+pred*.py
+
 # others
 temp/
